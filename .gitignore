@@ -1,0 +1,15 @@
+# python bytecode
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# nix / devenv artifacts
+result
+result-*
+.direnv/
+.devenv/
+
+# editor / OS
+.idea/
+*.iml
+.DS_Store

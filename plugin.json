@@ -1,0 +1,17 @@
+{
+    "id": "twtBar",
+    "name": "TrackWorkTime",
+    "description": "Work time tracking bar widget: shows worked time and flexi/overtime balance, clocks in/out against a twt-cloud backend",
+    "version": "1.0.0",
+    "author": "twt-cloud",
+    "type": "widget",
+    "capabilities": ["dankbar-widget", "clock-in-out", "flexi-balance"],
+    "component": "./TwtWidget.qml",
+    "settings": "./TwtSettings.qml",
+    "startupCheck": "./TwtStartupCheck.qml",
+    "icon": "schedule",
+    "license": "GPL-3.0-only",
+    "permissions": ["settings_read", "settings_write", "process", "network"],
+    "dependencies": ["curl", "python3"],
+    "requires_dms": ">=1.6.2"
+}
