@@ -19,7 +19,29 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qt6-declarative-dev-tools
-          qmllint -W -1 TwtWidget.qml TwtSettings.qml TwtStartupCheck.qml
+          # Debian/Ubuntu ship qmllint in /usr/lib/qt6/bin and keep it off PATH.
+          qmllint="$(command -v qmllint || echo /usr/lib/qt6/bin/qmllint)"
+          test -x "$qmllint"
+          # DMS (Theme, Proc, PluginSettings) and Quickshell modules only exist at
+          # runtime inside a DMS session, so semantic warnings are expected here:
+          # this step only fails when a file cannot be parsed. qmllint's warning
+          # categories and the max-warnings flag differ across Qt releases, so
+          # filter the JSON report instead of configuring levels.
+          "$qmllint" --json qmllint.json TwtWidget.qml TwtSettings.qml TwtStartupCheck.qml || true
+          python3 - <<'EOF'
+          import json, sys
+          report = json.load(open("qmllint.json"))
+          errors = []
+          for entry in report["files"]:
+              for warning in entry["warnings"]:
+                  # Qt 6.4/6.6: type "critical"; Qt 6.7+: id "syntax".
+                  if warning.get("type") == "critical" or warning.get("id") == "syntax":
+                      errors.append(f'{entry["filename"]}:{warning.get("line")}: {warning["message"]}')
+          for error in errors:
+              print(error, file=sys.stderr)
+          if errors:
+              sys.exit(f"{len(errors)} QML parse error(s)")
+          EOF
       - name: Plugin Python tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Validate helper and manifest
